@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // Start the Registration activity
+                // Start the RegistrationPOJO activity
                 Intent intent = new Intent(getApplicationContext(), RegistrationActivity.class);
                 startActivityForResult(intent, REQUEST_SIGNUP);
             }

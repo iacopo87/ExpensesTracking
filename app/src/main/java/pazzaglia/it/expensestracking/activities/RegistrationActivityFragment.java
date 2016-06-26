@@ -137,7 +137,7 @@ public class RegistrationActivityFragment extends Fragment {
     }
 
     private void onSignupFailed() {
-        Toast.makeText(getActivity().getBaseContext(), "Registration failed", Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity().getBaseContext(), "RegistrationPOJO failed", Toast.LENGTH_LONG).show();
         _signUpButton.setEnabled(true);
     }
 
