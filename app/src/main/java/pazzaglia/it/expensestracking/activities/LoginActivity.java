@@ -18,6 +18,9 @@ import pazzaglia.it.expensestracking.R;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
+    public static final String EMAIL = "EMAIL";
+    public static final String REGISTRATION_MESSAGE = "REGISTRATION_MESSAGE";
+
     private static final int REQUEST_SIGNUP = 0;
 
 
@@ -88,10 +91,8 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_SIGNUP) {
             if (resultCode == RESULT_OK) {
-
-                // TODO: Implement successful signup logic here
-                // By default we just finish the Activity and log them in automatically
-                this.finish();
+                _emailText.setText(data.getStringExtra(EMAIL));
+                Toast.makeText(getBaseContext(), data.getStringExtra(REGISTRATION_MESSAGE), Toast.LENGTH_LONG).show();
             }
         }
     }
