@@ -15,6 +15,14 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.Bind;
 import pazzaglia.it.expensestracking.R;
+import pazzaglia.it.expensestracking.binding.ApiInterface;
+import pazzaglia.it.expensestracking.models.LoginPOJO;
+import pazzaglia.it.expensestracking.models.RegistrationPOJO;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -22,7 +30,7 @@ import pazzaglia.it.expensestracking.R;
 public class RegistrationActivityFragment extends Fragment {
 
     private static final String TAG = "RegitratinActivityFragment";
-    private static final int REQUEST_SIGNUP = 0;
+    private static final String BASE_URL = "http://iacapi.tigrimigri.com/api/v1/";
 
     @Bind(R.id.input_name) EditText _nameText;
     @Bind(R.id.input_email) EditText _emailText;
@@ -63,7 +71,7 @@ public class RegistrationActivityFragment extends Fragment {
 
         if (!validate()) {
             //If there are wrong parameters we stop the signup
-            onSignupFailed();
+            onSignupFailed("");
             return;
         }
 
@@ -81,9 +89,38 @@ public class RegistrationActivityFragment extends Fragment {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
+        //Retrofit signUp
+        ApiInterface mApiService = this.getInterfaceService();
+        Call<RegistrationPOJO> mService = mApiService.registrationPost(name, email, password);
+        mService.enqueue(new Callback<RegistrationPOJO>() {
+            @Override
+            public void onResponse(Call<RegistrationPOJO> call, Response<RegistrationPOJO> response) {
+                RegistrationPOJO mregistrationnObject = response.body();
+                boolean registrationKo = mregistrationnObject.getError();
+                //showProgress(false);
+                if(!registrationKo){
+                    onSignupSuccess(mregistrationnObject.getMessage());
+
+                    //progressDialog.dismiss();
+                    // redirect to Main Activity page
+                    //Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
+                    //loginIntent.putExtra("EMAIL", email);
+                    //startActivity(loginIntent);
+                }else {
+                    onSignupFailed(mregistrationnObject.getMessage());
+                }
+                progressDialog.dismiss();
+            }
+            @Override
+            public void onFailure(Call<RegistrationPOJO> call, Throwable t) {
+                call.cancel();
+                onSignupFailed("Please check your network connection and internet permission");
+            }
+        });
+    }
 
         // TODO: Implement your own signup logic here.
-
+        /*
         new android.os.Handler().postDelayed(
                 new Runnable() {
                     public void run() {
@@ -94,11 +131,14 @@ public class RegistrationActivityFragment extends Fragment {
                         progressDialog.dismiss();
                     }
                 }, 3000);
-    }
+                */
 
-    public void onSignupSuccess() {
+    public void onSignupSuccess(String message) {
         _signUpButton.setEnabled(true);
-        getActivity().setResult(getActivity().RESULT_OK, null);
+        Intent output = new Intent();
+        output.putExtra(LoginActivity.EMAIL,  _emailText.getText().toString());
+        output.putExtra(LoginActivity.REGISTRATION_MESSAGE,  message);
+        getActivity().setResult(getActivity().RESULT_OK, output);
         getActivity().finish();
     }
 
@@ -136,9 +176,19 @@ public class RegistrationActivityFragment extends Fragment {
         return valid;
     }
 
-    private void onSignupFailed() {
-        Toast.makeText(getActivity().getBaseContext(), "RegistrationPOJO failed", Toast.LENGTH_LONG).show();
+    private void onSignupFailed(String message) {
+        if(message!="")
+            Toast.makeText(getActivity().getBaseContext(), message, Toast.LENGTH_LONG).show();
         _signUpButton.setEnabled(true);
+    }
+
+    private ApiInterface getInterfaceService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);
+        return mInterfaceService;
     }
 
 }
