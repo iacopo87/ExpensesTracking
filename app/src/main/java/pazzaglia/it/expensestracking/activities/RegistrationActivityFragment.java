@@ -88,7 +88,7 @@ public class RegistrationActivityFragment extends Fragment {
         String password = _passwordText.getText().toString();
 
         //Retrofit signUp
-        ApiInterface mApiService = Utils.getInterfaceService();
+        ApiInterface mApiService = Utils.getInterfaceService(false,"");
         Call<RegistrationPOJO> mService = mApiService.registrationPost(name, email, password);
         mService.enqueue(new Callback<RegistrationPOJO>() {
             @Override
