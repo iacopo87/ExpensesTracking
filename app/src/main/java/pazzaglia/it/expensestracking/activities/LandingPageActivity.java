@@ -20,6 +20,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +45,11 @@ public class LandingPageActivity extends AppCompatActivity
     public static final String LOGIN_NAME = "LOGIN_NAME";
     public static final String LOGIN_API_KEY = "LOGIN_API_KEY";
 
+    public static final int REQUEST_EDIT = 0;
+
+
+    public static final String MESSAGE = "MESSAGE";
+
     private RecyclerView recyclerView;
     private List<Expense> data;
     private DataAdapter adapter;
@@ -60,8 +66,10 @@ public class LandingPageActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                Intent intent = new Intent(LandingPageActivity.this, ExpenseDetailActivity.class);
+                intent.putExtra(ExpenseDetailActivity.MODE, ExpenseDetailActivity.ADD);
+                startActivityForResult(intent,REQUEST_EDIT);
             }
         });
 
@@ -131,21 +139,21 @@ public class LandingPageActivity extends AppCompatActivity
             @Override
             public void onResponse(Call<ExpensesListPOJO> call, Response<ExpensesListPOJO> response) {
                 ExpensesListPOJO mExpensesListObject = response.body();
-                boolean expensesGetKo = mExpensesListObject.getError();
+                boolean expensesGetKo = mExpensesListObject!=null && mExpensesListObject.getError();
                 //showProgress(false);
                 if(!expensesGetKo){
                     data = mExpensesListObject.getExpenses();
-                    adapter = new DataAdapter(data);
+                    adapter = new DataAdapter(data, LandingPageActivity.this);
                     recyclerView.setAdapter(adapter);
                 }else {
-                    //onSignupFailed(mregistrationnObject.getMessage());
+                    onDownloadListFailure("Error downloading data");
                 }
                 progressDialog.dismiss();
             }
             @Override
             public void onFailure(Call<ExpensesListPOJO> call, Throwable t) {
                 call.cancel();
-                //onSignupFailed("Please check your network connection and internet permission");
+                onDownloadListFailure("Please check your network connection and internet permission");
             }
         });
     }
@@ -180,5 +188,21 @@ public class LandingPageActivity extends AppCompatActivity
         finish();
 
         return true;
+    }
+
+    private void onDownloadListFailure(String message){
+        Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_EDIT) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(getBaseContext(), data.getStringExtra(LandingPageActivity.MESSAGE), Toast.LENGTH_LONG).show();
+                SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
+                String apiKey = sharedPref.getString("API_KEY","");
+                downloadExpenses(apiKey);
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public  class Utils {
 
-    private static final String BASE_URL = "http://iacapi.tigrimigri.com/api/v1/";
+    private static final String BASE_URL = "http://iacapi.tigrimigri.com/api/v2/";
     public static ApiInterface getInterfaceService(boolean authenticate, String apiKey) {
 
         Retrofit.Builder builder = new Retrofit.Builder()

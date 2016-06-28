@@ -94,12 +94,12 @@ public class RegistrationActivityFragment extends Fragment {
             @Override
             public void onResponse(Call<RegistrationPOJO> call, Response<RegistrationPOJO> response) {
                 RegistrationPOJO mregistrationnObject = response.body();
-                boolean registrationKo = mregistrationnObject.getError();
+                boolean registrationKo = mregistrationnObject!=null && mregistrationnObject.getError();
                 //showProgress(false);
                 if(!registrationKo){
                     onSignupSuccess(mregistrationnObject.getMessage());
                 }else {
-                    onSignupFailed(mregistrationnObject.getMessage());
+                    onSignupFailed((mregistrationnObject!=null)?mregistrationnObject.getMessage():"");
                 }
                 progressDialog.dismiss();
             }
