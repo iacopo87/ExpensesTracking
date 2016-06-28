@@ -2,23 +2,21 @@ package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
-import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.LoginPOJO;
-import pazzaglia.it.expensestracking.models.RegistrationPOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
 import retrofit2.Call;
@@ -96,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
 
 
-        //Retrofit signUp
+        //Retrofit login
         ApiInterface mApiService = Utils.getInterfaceService(false, "");
         Call<LoginPOJO> mService = mApiService.loginPost(email, password);
         mService.enqueue(new Callback<LoginPOJO>() {
