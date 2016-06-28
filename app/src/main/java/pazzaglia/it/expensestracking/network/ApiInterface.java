@@ -1,4 +1,4 @@
-package pazzaglia.it.expensestracking.binding;
+package pazzaglia.it.expensestracking.network;
 
 /**
  * Created by C305445 on 6/27/2016.

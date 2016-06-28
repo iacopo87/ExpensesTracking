@@ -10,6 +10,7 @@ import java.util.Map;
 public class LoginPOJO {
 
     private Boolean error;
+    private String message;
     private String name;
     private String email;
     private String apiKey;
@@ -102,8 +103,28 @@ public class LoginPOJO {
      * @param createdAt
      * The createdAt
      */
+
+
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    /**
+     *
+     * @return
+     * The message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     *
+     * @param message
+     * The message
+     */
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Map<String, Object> getAdditionalProperties() {

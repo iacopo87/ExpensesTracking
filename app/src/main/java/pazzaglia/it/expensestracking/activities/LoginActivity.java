@@ -1,6 +1,8 @@
 package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,9 +17,17 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.Bind;
 import pazzaglia.it.expensestracking.R;
+import pazzaglia.it.expensestracking.models.LoginPOJO;
+import pazzaglia.it.expensestracking.models.RegistrationPOJO;
+import pazzaglia.it.expensestracking.network.ApiInterface;
+import pazzaglia.it.expensestracking.network.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
+
     public static final String EMAIL = "EMAIL";
     public static final String REGISTRATION_MESSAGE = "REGISTRATION_MESSAGE";
 
@@ -32,8 +42,19 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //check if killed or logout
+        SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
+        String name = sharedPref.getString("NAME","");
+        String apiKey = sharedPref.getString("API_KEY","");
+        if (!name.equals("") && !apiKey.equals("")){
+            //navigate to LandingLoginPage
+            navigateToLandingPage(name);
+        }
+
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 
@@ -54,11 +75,12 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+
     public void login() {
         Log.d(TAG, "Login");
 
         if (!validate()) {
-            onLoginFailed();
+            onLoginFailed("");
             return;
         }
 
@@ -73,18 +95,30 @@ public class LoginActivity extends AppCompatActivity {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        // TODO: Implement your own authentication logic here.
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onLoginSuccess or onLoginFailed
-                        onLoginSuccess();
-                        // onLoginFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
+        //Retrofit signUp
+        ApiInterface mApiService = Utils.getInterfaceService();
+        Call<LoginPOJO> mService = mApiService.loginPost(email, password);
+        mService.enqueue(new Callback<LoginPOJO>() {
+            @Override
+            public void onResponse(Call<LoginPOJO> call, Response<LoginPOJO> response) {
+                LoginPOJO mLoginObject = response.body();
+                boolean loginKo = mLoginObject.getError();
+                if(!loginKo){
+                    onLoginSuccess(mLoginObject);
+                }else {
+                    onLoginFailed(mLoginObject.getMessage());
+                }
+                progressDialog.dismiss();
+            }
+            @Override
+            public void onFailure(Call<LoginPOJO> call, Throwable t) {
+                call.cancel();
+                onLoginFailed("Please check your network connection and internet permission");
+            }
+        });
     }
+
 
 
     @Override
@@ -103,13 +137,24 @@ public class LoginActivity extends AppCompatActivity {
         moveTaskToBack(true);
     }
 
-    public void onLoginSuccess() {
+    public void onLoginSuccess(LoginPOJO mLoginObject) {
+
         _loginButton.setEnabled(true);
-        finish();
+
+        //save API Key and name
+        SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN",Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("API_KEY", mLoginObject.getApiKey());
+        editor.putString("NAME", mLoginObject.getName());
+        editor.commit();
+
+        //open landing page
+        navigateToLandingPage( mLoginObject.getName());
     }
 
-    public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onLoginFailed(String message) {
+        if(message!="")
+            Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
         _loginButton.setEnabled(true);
     }
 
@@ -134,6 +179,12 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         return valid;
+    }
+
+    private void navigateToLandingPage(String name){
+        Intent intent = new Intent(getApplicationContext(), LandingPageActivity.class);
+        intent.putExtra(LandingPageActivity.LOGIN_NAME, name);
+        startActivity(intent);
     }
 }
 
