@@ -15,14 +15,13 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.Bind;
 import pazzaglia.it.expensestracking.R;
-import pazzaglia.it.expensestracking.binding.ApiInterface;
-import pazzaglia.it.expensestracking.models.LoginPOJO;
+import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
+import pazzaglia.it.expensestracking.network.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -30,7 +29,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RegistrationActivityFragment extends Fragment {
 
     private static final String TAG = "RegitratinActivityFragment";
-    private static final String BASE_URL = "http://iacapi.tigrimigri.com/api/v1/";
 
     @Bind(R.id.input_name) EditText _nameText;
     @Bind(R.id.input_email) EditText _emailText;
@@ -90,7 +88,7 @@ public class RegistrationActivityFragment extends Fragment {
         String password = _passwordText.getText().toString();
 
         //Retrofit signUp
-        ApiInterface mApiService = this.getInterfaceService();
+        ApiInterface mApiService = Utils.getInterfaceService();
         Call<RegistrationPOJO> mService = mApiService.registrationPost(name, email, password);
         mService.enqueue(new Callback<RegistrationPOJO>() {
             @Override
@@ -100,12 +98,6 @@ public class RegistrationActivityFragment extends Fragment {
                 //showProgress(false);
                 if(!registrationKo){
                     onSignupSuccess(mregistrationnObject.getMessage());
-
-                    //progressDialog.dismiss();
-                    // redirect to Main Activity page
-                    //Intent loginIntent = new Intent(LoginActivity.this, MainActivity.class);
-                    //loginIntent.putExtra("EMAIL", email);
-                    //startActivity(loginIntent);
                 }else {
                     onSignupFailed(mregistrationnObject.getMessage());
                 }
@@ -119,19 +111,6 @@ public class RegistrationActivityFragment extends Fragment {
         });
     }
 
-        // TODO: Implement your own signup logic here.
-        /*
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
-                        progressDialog.dismiss();
-                    }
-                }, 3000);
-                */
 
     public void onSignupSuccess(String message) {
         _signUpButton.setEnabled(true);
@@ -182,13 +161,6 @@ public class RegistrationActivityFragment extends Fragment {
         _signUpButton.setEnabled(true);
     }
 
-    private ApiInterface getInterfaceService() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        final ApiInterface mInterfaceService = retrofit.create(ApiInterface.class);
-        return mInterfaceService;
-    }
+
 
 }

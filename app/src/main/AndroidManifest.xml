@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pazzaglia.it.expensestracking">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +22,10 @@
         <activity
             android:name=".activities.RegistrationActivity"
             android:label="@string/title_activity_regitration"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".activities.LandingPageActivity"
+            android:label=""
             android:theme="@style/AppTheme"></activity>
     </application>
 
