@@ -27,6 +27,7 @@ import pazzaglia.it.expensestracking.models.Expense;
 import pazzaglia.it.expensestracking.models.ExpensesListPOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -93,24 +94,6 @@ public class LandingPageActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
 
 
-        /*
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                //Remove swiped item from list and notify the RecyclerView
-            }
-        };
-
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
-        */
-
         recyclerView.setLayoutManager(layoutManager);
 
         //Downaload the data
@@ -136,6 +119,7 @@ public class LandingPageActivity extends AppCompatActivity
                 //showProgress(false);
                 if(!expensesGetKo){
                     data = mExpensesListObject.getExpenses();
+                    Common.updateTotalExpenses(LandingPageActivity.this, data);
                     adapter = new DataAdapter(data, LandingPageActivity.this);
                     recyclerView.setAdapter(adapter);
                 }else {

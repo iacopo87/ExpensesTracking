@@ -27,6 +27,7 @@ import pazzaglia.it.expensestracking.models.Expense;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,9 +61,12 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     }
 
     public void delete(int position) { //removes the row
+
         expenses.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, expenses.size());
+        Activity myActivity = (Activity) context;
+        Common.updateTotalExpenses(myActivity,expenses);
     }
 
 
@@ -162,6 +166,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private void onDeleteSuccess(int index, String message){
         if(message!="")
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+
 
         delete(index);
     }
