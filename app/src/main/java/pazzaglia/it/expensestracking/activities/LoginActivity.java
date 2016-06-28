@@ -49,7 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         String apiKey = sharedPref.getString("API_KEY","");
         if (!name.equals("") && !apiKey.equals("")){
             //navigate to LandingLoginPage
-            navigateToLandingPage(name);
+            navigateToLandingPage(name, apiKey);
         }
 
         setContentView(R.layout.activity_login);
@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
         //Retrofit signUp
-        ApiInterface mApiService = Utils.getInterfaceService();
+        ApiInterface mApiService = Utils.getInterfaceService(false, "");
         Call<LoginPOJO> mService = mApiService.loginPost(email, password);
         mService.enqueue(new Callback<LoginPOJO>() {
             @Override
@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
         editor.commit();
 
         //open landing page
-        navigateToLandingPage( mLoginObject.getName());
+        navigateToLandingPage( mLoginObject.getName(),mLoginObject.getApiKey());
     }
 
     public void onLoginFailed(String message) {
@@ -181,9 +181,10 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
-    private void navigateToLandingPage(String name){
+    private void navigateToLandingPage(String name, String apiKey){
         Intent intent = new Intent(getApplicationContext(), LandingPageActivity.class);
         intent.putExtra(LandingPageActivity.LOGIN_NAME, name);
+        intent.putExtra(LandingPageActivity.LOGIN_API_KEY, apiKey);
         startActivity(intent);
     }
 }

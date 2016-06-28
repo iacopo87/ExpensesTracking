@@ -26,7 +26,8 @@
         <activity
             android:name=".activities.LandingPageActivity"
             android:label=""
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity android:name=".activities.ExpenseDetailActivity"></activity>
     </application>
 
 </manifest>
