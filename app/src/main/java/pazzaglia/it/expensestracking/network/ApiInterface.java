@@ -38,10 +38,10 @@ public interface ApiInterface {
     Call<ExpensesGetPOJO> expensesGetId(@Path("id") int groupId);
 
     @FormUrlEncoded
-    @PUT("expenses")
-    Call<ExpensesCreatePOJO> expensesPut(@Field("description") String description, @Field("date") String date, @Field("amount") double amount, @Field("category") int category);
+    @POST("expenses/{id}")
+    Call<ExpensesCreatePOJO> expensesPut(@Path("id") int id, @Field("description") String description, @Field("date") String date, @Field("amount") double amount, @Field("category") int category);
 
-    @DELETE("expenses/{id}")
-    Call<ExpensesGetPOJO> expensesDelete(@Path("id") int groupId);
+    @POST("expenses/{id}/delete")
+    Call<ExpensesGetPOJO> expensesDelete(@Path("id") int id);
 
 }

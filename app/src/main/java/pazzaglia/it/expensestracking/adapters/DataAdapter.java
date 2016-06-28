@@ -4,20 +4,28 @@ package pazzaglia.it.expensestracking.adapters;
  * Created by IO on 28/06/2016.
  */
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import java.util.List;
+
+import pazzaglia.it.expensestracking.activities.ExpenseDetailActivity;
+import pazzaglia.it.expensestracking.activities.LandingPageActivity;
 import pazzaglia.it.expensestracking.models.Expense;
 import pazzaglia.it.expensestracking.R;
 
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
+    Context context;
     private List<Expense> expenses;
 
-    public DataAdapter(List<Expense> android) {
+    public DataAdapter(List<Expense> android, Context c) {
         this.expenses = android;
+        this.context = c;
     }
 
     @Override
@@ -61,7 +69,17 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             //delete(getAdapterPosition()); //calls the method above to delete
-            expenses.get(0);
+            //expenses.get(0);
+
+            Intent intent = new Intent(context, ExpenseDetailActivity.class);
+            intent.putExtra(ExpenseDetailActivity.DESCRIPTION, expenses.get(getAdapterPosition()).getDescription());
+            intent.putExtra(ExpenseDetailActivity.AMOUNT, expenses.get(getAdapterPosition()).getAmount());
+            intent.putExtra(ExpenseDetailActivity.DATE, expenses.get(getAdapterPosition()).getDate());
+            intent.putExtra(ExpenseDetailActivity.CATEGORY, expenses.get(getAdapterPosition()).getCategory());
+            intent.putExtra(ExpenseDetailActivity.ID, expenses.get(getAdapterPosition()).getId());
+            intent.putExtra(ExpenseDetailActivity.MODE, ExpenseDetailActivity.EDIT);
+
+            ((Activity) context).startActivityForResult(intent,LandingPageActivity.REQUEST_EDIT);
         }
 
     }

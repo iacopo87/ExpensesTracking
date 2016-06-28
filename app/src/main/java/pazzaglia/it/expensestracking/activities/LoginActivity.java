@@ -103,11 +103,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<LoginPOJO> call, Response<LoginPOJO> response) {
                 LoginPOJO mLoginObject = response.body();
-                boolean loginKo = mLoginObject.getError();
+                boolean loginKo = mLoginObject != null && mLoginObject.getError();
                 if(!loginKo){
                     onLoginSuccess(mLoginObject);
                 }else {
-                    onLoginFailed(mLoginObject.getMessage());
+                    onLoginFailed((mLoginObject != null)?mLoginObject.getMessage():"");
                 }
                 progressDialog.dismiss();
             }
@@ -140,6 +140,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onLoginSuccess(LoginPOJO mLoginObject) {
 
         _loginButton.setEnabled(true);
+        _passwordText.setText("");
 
         //save API Key and name
         SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN",Context.MODE_PRIVATE);
