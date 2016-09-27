@@ -23,6 +23,7 @@ import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.ExpensesCreatePOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -120,11 +121,7 @@ public class ExpenseDetailActivity extends AppCompatActivity {
         _btn_cancel.setEnabled(false);
         _btn_modify.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(ExpenseDetailActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Saving...");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Common.showProgressDialog(ExpenseDetailActivity.this, "Saving...");
 
         //retrieve apiKey
         SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);

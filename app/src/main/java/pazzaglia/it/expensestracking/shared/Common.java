@@ -1,6 +1,8 @@
 package pazzaglia.it.expensestracking.shared;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.widget.TextView;
 
 import java.util.List;
@@ -23,4 +25,14 @@ public class Common {
         ((TextView)activity.findViewById(R.id.text_totalExpenses)).setText(String.format(Locale.US, "%.2f€", totalExpenses));
     };
 
+    public static ProgressDialog showProgressDialog(Context context,String message){
+
+        ProgressDialog progressDialog = new ProgressDialog(context,
+                R.style.AppTheme_Dark_Dialog);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage(message);
+        progressDialog.show();
+
+        return progressDialog;
+    }
 }

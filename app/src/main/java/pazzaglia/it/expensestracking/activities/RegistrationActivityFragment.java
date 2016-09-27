@@ -18,6 +18,7 @@ import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
 import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,11 +78,7 @@ public class RegistrationActivityFragment extends Fragment {
         _signUpButton.setEnabled(false);
 
         //Show the spinner
-        final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Registering...");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Common.showProgressDialog(getActivity(), "Registering...");
 
         String name = _nameText.getText().toString();
         String email = _emailText.getText().toString();

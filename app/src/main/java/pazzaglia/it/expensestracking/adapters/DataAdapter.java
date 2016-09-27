@@ -85,9 +85,10 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
         @Override
         public void onClick(View v) {
-            //delete(getAdapterPosition()); //calls the method above to delete
-            //expenses.get(0);
+            launchLandingPageActivity();
+        }
 
+        private void launchLandingPageActivity(){
             Intent intent = new Intent(context, ExpenseDetailActivity.class);
             intent.putExtra(ExpenseDetailActivity.DESCRIPTION, expenses.get(getAdapterPosition()).getDescription());
             intent.putExtra(ExpenseDetailActivity.AMOUNT, expenses.get(getAdapterPosition()).getAmount());
@@ -130,12 +131,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         }
 
         public void deleteItem(final int index){
-
-            final ProgressDialog progressDialog = new ProgressDialog(context,
-                    R.style.AppTheme_Dark_Dialog);
-            progressDialog.setIndeterminate(true);
-            progressDialog.setMessage("Deleting...");
-            progressDialog.show();
+            final ProgressDialog progressDialog = Common.showProgressDialog(context, "Deleting...");
 
             //Retrofit delete
             SharedPreferences sharedPref = context.getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);

@@ -19,6 +19,7 @@ import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.LoginPOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -84,11 +85,7 @@ public class LoginActivity extends AppCompatActivity {
 
         _loginButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Common.showProgressDialog(LoginActivity.this, "Authenticating...");
 
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();

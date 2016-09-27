@@ -4,7 +4,6 @@ package pazzaglia.it.expensestracking.network;
  * Created by C305445 on 6/27/2016.
  */
 import pazzaglia.it.expensestracking.models.ExpensesCreatePOJO;
-import pazzaglia.it.expensestracking.models.ExpensesGetPOJO;
 import pazzaglia.it.expensestracking.models.ExpensesListPOJO;
 import pazzaglia.it.expensestracking.models.LoginPOJO;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
@@ -31,9 +30,6 @@ public interface ApiInterface {
     @FormUrlEncoded
     @POST("expenses")
     Call<ExpensesCreatePOJO> expensesPost(@Field("description") String description, @Field("date") String date, @Field("amount") double amount, @Field("category") int category);
-
-    @GET("expenses/{id}")
-    Call<ExpensesGetPOJO> expensesGetId(@Path("id") int groupId);
 
     @FormUrlEncoded
     @POST("expenses/{id}")

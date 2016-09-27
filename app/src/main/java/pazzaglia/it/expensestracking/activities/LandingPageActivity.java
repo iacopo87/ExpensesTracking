@@ -92,8 +92,6 @@ public class LandingPageActivity extends AppCompatActivity
         recyclerView = (RecyclerView)findViewById(R.id.card_recycler_view);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-
-
         recyclerView.setLayoutManager(layoutManager);
 
         //Downaload the data
@@ -102,11 +100,7 @@ public class LandingPageActivity extends AppCompatActivity
 
     private void downloadExpenses(String apiKey){
         //Show the loader
-        final ProgressDialog progressDialog = new ProgressDialog(LandingPageActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Retrieving data...");
-        progressDialog.show();
+        final ProgressDialog progressDialog = Common.showProgressDialog(LandingPageActivity.this, "Retrieving data..." );
 
         //Retrofit expenses list download
         ApiInterface mApiService = Utils.getInterfaceService(true, apiKey);
