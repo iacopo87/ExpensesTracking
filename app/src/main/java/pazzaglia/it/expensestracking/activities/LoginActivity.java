@@ -26,12 +26,9 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
-
     public static final String EMAIL = "EMAIL";
     public static final String REGISTRATION_MESSAGE = "REGISTRATION_MESSAGE";
-
     private static final int REQUEST_SIGNUP = 0;
-
 
     @Bind(R.id.input_email) EditText _emailText;
     @Bind(R.id.input_password) EditText _passwordText;
@@ -42,6 +39,9 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
+
         //check if killed or logout
         SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
         String name = sharedPref.getString("NAME","");
@@ -50,10 +50,6 @@ public class LoginActivity extends AppCompatActivity {
             //navigate to LandingLoginPage
             navigateToLandingPage(name, apiKey);
         }
-
-        setContentView(R.layout.activity_login);
-        ButterKnife.bind(this);
-
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 

@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.activities.ExpenseDetailActivity;
 import pazzaglia.it.expensestracking.activities.LandingPageActivity;
@@ -49,10 +51,9 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(DataAdapter.ViewHolder viewHolder, int i) {
-
-        viewHolder.text_description.setText(expenses.get(i).getDescription());
-        viewHolder.text_amount.setText(String.format("%.2f€", expenses.get(i).getAmount()));
-        viewHolder.text_date.setText(expenses.get(i).getDate());
+        viewHolder._txtDescription.setText(expenses.get(i).getDescription());
+        viewHolder._txtAmount.setText(String.format("%.2f€", expenses.get(i).getAmount()));
+        viewHolder._txtDate.setText(expenses.get(i).getDate());
     }
 
     @Override
@@ -69,16 +70,28 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         Common.updateTotalExpenses(myActivity,expenses);
     }
 
+    private void onDeleteSuccess(int index, String message){
+        if(message!="")
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+
+
+        delete(index);
+    }
+
+    private void onDeleteFailed(String message){
+        if(message!="")
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        private TextView text_description,text_amount,text_date;
+
+        @Bind(R.id.text_description) TextView _txtDescription;
+        @Bind(R.id.text_amount) TextView _txtAmount;
+        @Bind(R.id.text_date) TextView _txtDate;
+
         public ViewHolder(View view) {
             super(view);
-
-            text_description = (TextView)view.findViewById(R.id.text_description);
-            text_amount = (TextView)view.findViewById(R.id.text_amount);
-            text_date = (TextView)view.findViewById(R.id.text_date);
-
+            ButterKnife.bind(this, view);
             view.setOnClickListener(this);
             view.setOnLongClickListener(this);
         }
@@ -159,17 +172,5 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         }
     }
 
-    private void onDeleteSuccess(int index, String message){
-        if(message!="")
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-
-
-        delete(index);
-    }
-
-    private void onDeleteFailed(String message){
-        if(message!="")
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-    }
 
 }

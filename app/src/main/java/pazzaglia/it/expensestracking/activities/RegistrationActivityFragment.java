@@ -28,7 +28,6 @@ import retrofit2.Response;
  * A placeholder fragment containing a simple view.
  */
 public class RegistrationActivityFragment extends Fragment {
-
     private static final String TAG = "RegitratinActivityFragment";
 
     @Bind(R.id.input_name) EditText _nameText;

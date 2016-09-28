@@ -21,6 +21,8 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.adapters.DataAdapter;
 import pazzaglia.it.expensestracking.models.Expense;
@@ -39,24 +41,26 @@ public class LandingPageActivity extends AppCompatActivity
     public static final String LOGIN_API_KEY = "LOGIN_API_KEY";
 
     public static final int REQUEST_EDIT = 0;
-
-
     public static final String MESSAGE = "MESSAGE";
 
-    private RecyclerView recyclerView;
     private List<Expense> data;
     private DataAdapter adapter;
+
+    @Bind(R.id.toolbar) Toolbar _toolbar;
+    @Bind(R.id.fab) FloatingActionButton _fab;
+    @Bind(R.id.drawer_layout) DrawerLayout _drawer;
+    @Bind(R.id.nav_view) NavigationView _navigationView;
+    @Bind(R.id.card_recycler_view) RecyclerView _recycleView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_landing_page);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        ButterKnife.bind(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        setSupportActionBar(_toolbar);
+        _fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -65,22 +69,16 @@ public class LandingPageActivity extends AppCompatActivity
                 startActivityForResult(intent,REQUEST_EDIT);
             }
         });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+                this, _drawer, _toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        _drawer.setDrawerListener(toggle);
         toggle.syncState();
+        _navigationView.setNavigationItemSelectedListener(this);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        //Set the name on the drawer
+        //Set the name on the _drawer
         Intent intent = getIntent();
         String name = intent.getStringExtra(LOGIN_NAME);
-        View headerLayout = navigationView.getHeaderView(0);
-        TextView nameTextView = ((TextView) headerLayout.findViewById(R.id.textViewName));
-        nameTextView.setText(name);
+        ((TextView)_navigationView.getHeaderView(0).findViewById(R.id.textViewName)).setText(name);
 
         //Retrieve the data and show them
         String apiKey = intent.getStringExtra(LOGIN_API_KEY);
@@ -89,10 +87,9 @@ public class LandingPageActivity extends AppCompatActivity
 
     private void expensesListLoading(String apiKey){
         //initialize the view
-        recyclerView = (RecyclerView)findViewById(R.id.card_recycler_view);
-        recyclerView.setHasFixedSize(true);
+        _recycleView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
+        _recycleView.setLayoutManager(layoutManager);
 
         //Downaload the data
         downloadExpenses(apiKey);
@@ -115,7 +112,7 @@ public class LandingPageActivity extends AppCompatActivity
                     data = mExpensesListObject.getExpenses();
                     Common.updateTotalExpenses(LandingPageActivity.this, data);
                     adapter = new DataAdapter(data, LandingPageActivity.this);
-                    recyclerView.setAdapter(adapter);
+                    _recycleView.setAdapter(adapter);
                 }else {
                     onDownloadListFailure("Error downloading data");
                 }
@@ -130,9 +127,8 @@ public class LandingPageActivity extends AppCompatActivity
     }
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (_drawer.isDrawerOpen(GravityCompat.START)) {
+            _drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }

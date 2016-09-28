@@ -41,27 +41,19 @@ public class ExpenseDetailActivity extends AppCompatActivity {
     public static final String CATEGORY = "CATEGORY";
     public static final String ID = "ID";
 
-    @Bind(R.id.text_detail_title)
-    TextView _text_detail_title;
-    @Bind(R.id.edit_description)
-    EditText _edit_description;
-    @Bind(R.id.edit_amount)
-    EditText _edit_amount;
-    @Bind(R.id.edit_date)
-    EditText _edit_date;
-    @Bind(R.id.btn_cancel)
-    Button _btn_cancel;
-    @Bind(R.id.btn_modify)
-    Button _btn_modify;
+    @Bind(R.id.text_detail_title) TextView _text_detail_title;
+    @Bind(R.id.edit_description) EditText _edit_description;
+    @Bind(R.id.edit_amount) EditText _edit_amount;
+    @Bind(R.id.edit_date) EditText _edit_date;
+    @Bind(R.id.btn_cancel) Button _btn_cancel;
+    @Bind(R.id.btn_modify) Button _btn_modify;
 
     private int category;
     private int id;
     private String description;
     private double amount;
     private String date;
-
     private String mode;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
