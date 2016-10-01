@@ -4,17 +4,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import butterknife.Bind;
@@ -24,6 +21,7 @@ import pazzaglia.it.expensestracking.models.ExpensesCreatePOJO;
 import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
 import pazzaglia.it.expensestracking.shared.Common;
+import pazzaglia.it.expensestracking.shared.Validator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -156,42 +154,20 @@ public class ExpenseDetailActivity extends AppCompatActivity {
     public boolean validate() {
         boolean valid = true;
 
+        //check description
         String description = _edit_description.getText().toString();
+        valid &= Validator.isStringValid(description,_edit_description);
+        if(valid) this.description = description;
+
+        //Check amount
         String amount = _edit_amount.getText().toString();
+        valid &= Validator.isAmountValid(amount,_edit_amount);
+        if(valid) this.amount = Double.parseDouble(amount);
+
+        //checkDate
         String date = _edit_date.getText().toString();
-
-        if (description.isEmpty() || description.length() < 3) {
-            _edit_description.setError("Must be at least 3 characters.");
-            valid = false;
-        } else {
-            _edit_description.setError(null);
-            this.description = description;
-        }
-
-
-        if(amount == null || amount.isEmpty()) {
-            _edit_amount.setError("Invalid amount");
-            valid = false;
-        } else {
-            try {
-                double newAmount = Double.parseDouble(amount);
-                this.amount = newAmount;
-            } catch (Exception e){
-                _edit_amount.setError("Invalid amount");
-                valid = false;
-            }
-
-        }
-
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date myDate;
-        try {
-            myDate = df.parse(date);
-            this.date = date;
-        } catch (ParseException e) {
-            _edit_description.setError("Invalid date.The format is yyyy-MM-dd HH:mm:ss");
-            valid = false;
-        }
+        valid &= Validator.isDateValid(date,_edit_date);
+        if(valid) this.date = date;
 
         return valid;
     }

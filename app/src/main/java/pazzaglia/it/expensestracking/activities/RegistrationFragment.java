@@ -2,8 +2,8 @@ package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,23 +12,25 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import butterknife.ButterKnife;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
-import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
+import pazzaglia.it.expensestracking.network.ApiInterface;
 import pazzaglia.it.expensestracking.network.Utils;
 import pazzaglia.it.expensestracking.shared.Common;
+import pazzaglia.it.expensestracking.shared.Validator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 ;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class RegistrationActivityFragment extends Fragment {
-    private static final String TAG = "RegitratinActivityFragment";
+public class RegistrationFragment extends Fragment {
+    private static final String TAG = "RegistrationFragment";
 
     @Bind(R.id.input_name) EditText _nameText;
     @Bind(R.id.input_email) EditText _emailText;
@@ -36,7 +38,7 @@ public class RegistrationActivityFragment extends Fragment {
     @Bind(R.id.btn_signup) Button _signUpButton;
     @Bind(R.id.link_login) TextView _loginLink;
 
-    public RegistrationActivityFragment() {
+    public RegistrationFragment() {
     }
 
     @Override
@@ -120,33 +122,17 @@ public class RegistrationActivityFragment extends Fragment {
     private boolean validate(){
         boolean valid = true;
 
-        String name = _nameText.getText().toString();
-
         //check name
-        if (name.isEmpty() ||name.length() < 3){
-            _nameText.setError("At least three characters");
-            valid = false;
-        } else {
-            _nameText.setError(null);
-        }
+        String name = _nameText.getText().toString();
+        valid &= Validator.isStringValid(name,_nameText);
 
         //check email
         String email = _emailText.getText().toString();
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("enter a valid email address");
-            valid = false;
-        } else {
-            _emailText.setError(null);
-        }
+        valid &= Validator.isEmailValid(email,_emailText);
 
         //check password
         String password = _passwordText.getText().toString();
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
-            valid = false;
-        } else {
-            _passwordText.setError(null);
-        }
+        valid &= Validator.isPasswordValid(password,_passwordText);
 
         return valid;
     }
