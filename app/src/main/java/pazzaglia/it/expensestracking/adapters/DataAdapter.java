@@ -9,7 +9,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -62,7 +61,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     }
 
     public void delete(int position) { //removes the row
-
         expenses.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, expenses.size());
@@ -73,8 +71,6 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     private void onDeleteSuccess(int index, String message){
         if(message!="")
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-
-
         delete(index);
     }
 
@@ -147,9 +143,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
             final ProgressDialog progressDialog = Common.showProgressDialog(context, "Deleting...");
 
             //Retrofit delete
-            SharedPreferences sharedPref = context.getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
-            String apiKey = sharedPref.getString("API_KEY","");
-            ApiInterface mApiService = Utils.getInterfaceService(true, apiKey);
+            ApiInterface mApiService = Utils.getInterfaceService(context, true);
             Call<RegistrationPOJO> mService = mApiService.expensesDelete(expenses.get(index).getId());
             mService.enqueue(new Callback<RegistrationPOJO>() {
                 @Override

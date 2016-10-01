@@ -1,9 +1,7 @@
 package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -36,9 +34,6 @@ import retrofit2.Response;
 
 public class LandingPageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
-    public static final String LOGIN_NAME = "LOGIN_NAME";
-    public static final String LOGIN_API_KEY = "LOGIN_API_KEY";
 
     public static final int REQUEST_EDIT = 0;
     public static final String MESSAGE = "MESSAGE";
@@ -76,31 +71,29 @@ public class LandingPageActivity extends AppCompatActivity
         _navigationView.setNavigationItemSelectedListener(this);
 
         //Set the name on the _drawer
-        Intent intent = getIntent();
-        String name = intent.getStringExtra(LOGIN_NAME);
+        String name = Common.getName(this);
         ((TextView)_navigationView.getHeaderView(0).findViewById(R.id.textViewName)).setText(name);
 
         //Retrieve the data and show them
-        String apiKey = intent.getStringExtra(LOGIN_API_KEY);
-        expensesListLoading(apiKey);
+        expensesListLoading();
     }
 
-    private void expensesListLoading(String apiKey){
+    private void expensesListLoading(){
         //initialize the view
         _recycleView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         _recycleView.setLayoutManager(layoutManager);
 
         //Downaload the data
-        downloadExpenses(apiKey);
+        downloadExpenses();
     }
 
-    private void downloadExpenses(String apiKey){
+    private void downloadExpenses(){
         //Show the loader
         final ProgressDialog progressDialog = Common.showProgressDialog(LandingPageActivity.this, "Retrieving data..." );
 
         //Retrofit expenses list download
-        ApiInterface mApiService = Utils.getInterfaceService(true, apiKey);
+        ApiInterface mApiService = Utils.getInterfaceService(this, true);
         Call<ExpensesListPOJO> mService = mApiService.expensesGet();
         mService.enqueue(new Callback<ExpensesListPOJO>() {
             @Override
@@ -143,11 +136,7 @@ public class LandingPageActivity extends AppCompatActivity
 
         if (id == R.id.nav_logout) {
             //reset API Key
-            SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN",Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("API_KEY", "");
-            editor.putString("NAME", "");
-            editor.commit();
+            Common.clearApiKeyAndName(this);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -166,9 +155,7 @@ public class LandingPageActivity extends AppCompatActivity
         if (requestCode == REQUEST_EDIT) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(getBaseContext(), data.getStringExtra(LandingPageActivity.MESSAGE), Toast.LENGTH_LONG).show();
-                SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
-                String apiKey = sharedPref.getString("API_KEY","");
-                downloadExpenses(apiKey);
+                downloadExpenses();
             }
         }
     }

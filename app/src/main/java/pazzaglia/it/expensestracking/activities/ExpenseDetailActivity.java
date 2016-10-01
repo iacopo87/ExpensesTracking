@@ -1,9 +1,7 @@
 package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -113,12 +111,8 @@ public class ExpenseDetailActivity extends AppCompatActivity {
 
         final ProgressDialog progressDialog = Common.showProgressDialog(ExpenseDetailActivity.this, "Saving...");
 
-        //retrieve apiKey
-        SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
-        String apiKey = sharedPref.getString("API_KEY","");
-
         //Retrofit editExpense
-        ApiInterface mApiService = Utils.getInterfaceService(true, apiKey);
+        ApiInterface mApiService = Utils.getInterfaceService(this, true);
 
         _edit_description.setText(description);
         _edit_amount.setText(String.format(Locale.US, "%.2f", amount));

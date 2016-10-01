@@ -1,9 +1,7 @@
 package pazzaglia.it.expensestracking.activities;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -44,12 +42,11 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         //check if killed or logout
-        SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN", Context.MODE_PRIVATE);
-        String name = sharedPref.getString("NAME","");
-        String apiKey = sharedPref.getString("API_KEY","");
+        String name = Common.getName(this);
+        String apiKey = Common.getApiKey(this);
         if (!name.equals("") && !apiKey.equals("")){
             //navigate to LandingLoginPage
-            navigateToLandingPage(name, apiKey);
+            navigateToLandingPage();
         }
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
@@ -87,9 +84,8 @@ public class LoginActivity extends AppCompatActivity {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
 
-
         //Retrofit login
-        ApiInterface mApiService = Utils.getInterfaceService(false, "");
+        ApiInterface mApiService = Utils.getInterfaceService(this, false);
         Call<LoginPOJO> mService = mApiService.loginPost(email, password);
         mService.enqueue(new Callback<LoginPOJO>() {
             @Override
@@ -130,19 +126,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onLoginSuccess(LoginPOJO mLoginObject) {
-
         _loginButton.setEnabled(true);
         _passwordText.setText("");
 
         //save API Key and name
-        SharedPreferences sharedPref = getSharedPreferences("PREF_LOGIN",Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("API_KEY", mLoginObject.getApiKey());
-        editor.putString("NAME", mLoginObject.getName());
-        editor.commit();
+        Common.setApiKeyAndName(this, mLoginObject.getApiKey(), mLoginObject.getName());
 
         //open landing page
-        navigateToLandingPage( mLoginObject.getName(),mLoginObject.getApiKey());
+        navigateToLandingPage();
     }
 
     public void onLoginFailed(String message) {
@@ -165,10 +156,8 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
-    private void navigateToLandingPage(String name, String apiKey){
+    private void navigateToLandingPage(){
         Intent intent = new Intent(getApplicationContext(), LandingPageActivity.class);
-        intent.putExtra(LandingPageActivity.LOGIN_NAME, name);
-        intent.putExtra(LandingPageActivity.LOGIN_API_KEY, apiKey);
         startActivity(intent);
     }
 }

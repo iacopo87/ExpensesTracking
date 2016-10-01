@@ -1,12 +1,14 @@
 package pazzaglia.it.expensestracking.network;
 
+import android.content.Context;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import pazzaglia.it.expensestracking.network.ApiInterface;
+import pazzaglia.it.expensestracking.shared.Common;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -17,14 +19,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public  class Utils {
 
     private static final String BASE_URL = "http://iacapi.tigrimigri.com/api/v2/";
-    public static ApiInterface getInterfaceService(boolean authenticate, String apiKey) {
+    public static ApiInterface getInterfaceService(Context context, boolean authenticate) {
 
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create());
 
         if (authenticate){
-            builder.client(getClientWithAuth(apiKey));
+            builder.client(getClientWithAuth(Common.getApiKey(context)));
         }
 
         Retrofit retrofit = builder.build();
