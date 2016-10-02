@@ -1,6 +1,5 @@
 package pazzaglia.it.expensestracking.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,15 +21,12 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
-import pazzaglia.it.expensestracking.adapters.DataAdapter;
+import pazzaglia.it.expensestracking.adapters.ExpensesListAdapter;
 import pazzaglia.it.expensestracking.models.Expense;
 import pazzaglia.it.expensestracking.models.ExpensesListPOJO;
-import pazzaglia.it.expensestracking.network.ApiInterface;
-import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.network.AbstractApiCaller;
+import pazzaglia.it.expensestracking.network.ExpensesCaller;
 import pazzaglia.it.expensestracking.shared.Common;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LandingPageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -39,7 +35,7 @@ public class LandingPageActivity extends AppCompatActivity
     public static final String MESSAGE = "MESSAGE";
 
     private List<Expense> data;
-    private DataAdapter adapter;
+    private ExpensesListAdapter adapter;
 
     @Bind(R.id.toolbar) Toolbar _toolbar;
     @Bind(R.id.fab) FloatingActionButton _fab;
@@ -89,35 +85,28 @@ public class LandingPageActivity extends AppCompatActivity
     }
 
     private void downloadExpenses(){
-        //Show the loader
-        final ProgressDialog progressDialog = Common.showProgressDialog(LandingPageActivity.this, "Retrieving data..." );
-
         //Retrofit expenses list download
-        ApiInterface mApiService = Utils.getInterfaceService(this, true);
-        Call<ExpensesListPOJO> mService = mApiService.expensesGet();
-        mService.enqueue(new Callback<ExpensesListPOJO>() {
+        ExpensesCaller expensesCaller = new ExpensesCaller(this);
+        expensesCaller.doApiCall(this, "Retrieving data...", new AbstractApiCaller.MyCallbackInterface<ExpensesListPOJO>() {
             @Override
-            public void onResponse(Call<ExpensesListPOJO> call, Response<ExpensesListPOJO> response) {
-                ExpensesListPOJO mExpensesListObject = response.body();
-                boolean expensesGetKo = mExpensesListObject!=null && mExpensesListObject.getError();
-                //showProgress(false);
-                if(!expensesGetKo){
-                    data = mExpensesListObject.getExpenses();
-                    Common.updateTotalExpenses(LandingPageActivity.this, data);
-                    adapter = new DataAdapter(data, LandingPageActivity.this);
-                    _recycleView.setAdapter(adapter);
-                }else {
-                    onDownloadListFailure("Error downloading data");
-                }
-                progressDialog.dismiss();
+            public void onDownloadFinishedOK(ExpensesListPOJO result) {
+                data = result.getExpenses();
+                Common.updateTotalExpenses(LandingPageActivity.this, data);
+                adapter = new ExpensesListAdapter(data, LandingPageActivity.this);
+                _recycleView.setAdapter(adapter);
             }
             @Override
-            public void onFailure(Call<ExpensesListPOJO> call, Throwable t) {
-                call.cancel();
+            public void onDownloadFinishedKO(ExpensesListPOJO result) {
+                onDownloadListFailure("Error downloading data");
+            }
+
+            @Override
+            public void doApiCallOnFailure() {
                 onDownloadListFailure("Please check your network connection and internet permission");
             }
         });
     }
+
     @Override
     public void onBackPressed() {
         if (_drawer.isDrawerOpen(GravityCompat.START)) {
@@ -126,7 +115,6 @@ public class LandingPageActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

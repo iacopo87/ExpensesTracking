@@ -1,6 +1,5 @@
 package pazzaglia.it.expensestracking.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,13 +15,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.ExpensesCreatePOJO;
-import pazzaglia.it.expensestracking.network.ApiInterface;
-import pazzaglia.it.expensestracking.network.Utils;
-import pazzaglia.it.expensestracking.shared.Common;
+import pazzaglia.it.expensestracking.network.AbstractApiCaller;
+import pazzaglia.it.expensestracking.network.ExpensesPostCaller;
+import pazzaglia.it.expensestracking.network.ExpensesPutCaller;
 import pazzaglia.it.expensestracking.shared.Validator;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ExpenseDetailActivity extends AppCompatActivity {
     private static final String TAG = "ExpenseDetailActivity";
@@ -97,54 +93,6 @@ public class ExpenseDetailActivity extends AppCompatActivity {
 
     }
 
-
-    private void editOrAddExpense() {
-        Call<ExpensesCreatePOJO> mService = null;
-
-        if (!validate()) {
-            onEditFailed("");
-            return;
-        }
-
-        _btn_cancel.setEnabled(false);
-        _btn_modify.setEnabled(false);
-
-        final ProgressDialog progressDialog = Common.showProgressDialog(ExpenseDetailActivity.this, "Saving...");
-
-        //Retrofit editExpense
-        ApiInterface mApiService = Utils.getInterfaceService(this, true);
-
-        _edit_description.setText(description);
-        _edit_amount.setText(String.format(Locale.US, "%.2f", amount));
-        _edit_date.setText(date);
-
-        if(mode.equals(EDIT)) {
-            mService = mApiService.expensesPut(id, description, date, amount, category);
-        } else {
-            mService = mApiService.expensesPost(description, date, amount, category);
-        }
-
-        mService.enqueue(new Callback<ExpensesCreatePOJO>() {
-            @Override
-            public void onResponse(Call<ExpensesCreatePOJO> call, Response<ExpensesCreatePOJO> response) {
-                ExpensesCreatePOJO mExpenseObject = response.body();
-                boolean editKo = mExpenseObject!= null && mExpenseObject.getError();
-                if(!editKo){
-                    onEditSuccess(mExpenseObject.getMessage());
-                }else {
-                    onEditFailed((mExpenseObject!= null)?mExpenseObject.getMessage():"");
-                }
-                progressDialog.dismiss();
-            }
-            @Override
-            public void onFailure(Call<ExpensesCreatePOJO> call, Throwable t) {
-                call.cancel();
-                onEditFailed("Please check your network connection and internet permission");
-            }
-        });
-
-    }
-
     public boolean validate() {
         boolean valid = true;
 
@@ -165,6 +113,47 @@ public class ExpenseDetailActivity extends AppCompatActivity {
 
         return valid;
     }
+
+    private AbstractApiCaller.MyCallbackInterface<ExpensesCreatePOJO> callback = new AbstractApiCaller.MyCallbackInterface<ExpensesCreatePOJO>() {
+        @Override
+        public void onDownloadFinishedOK(ExpensesCreatePOJO result) {
+            onEditSuccess(result.getMessage());
+        }
+        @Override
+        public void onDownloadFinishedKO(ExpensesCreatePOJO result) {
+            onEditFailed((result!= null)?result.getMessage():"");
+        }
+
+        @Override
+        public void doApiCallOnFailure() {
+            onEditFailed("Please check your network connection and internet permission");
+        }
+    };
+
+    private void editOrAddExpense() {
+
+        if (!validate()) {
+            onEditFailed("");
+            return;
+        }
+
+        _btn_cancel.setEnabled(false);
+        _btn_modify.setEnabled(false);
+        _edit_description.setText(description);
+        _edit_amount.setText(String.format(Locale.US, "%.2f", amount));
+        _edit_date.setText(date);
+
+        if(mode.equals(EDIT)) {
+            ExpensesPutCaller expensesPutCaller = new ExpensesPutCaller(this,id, description, date, amount, category );
+            expensesPutCaller.doApiCall(this, "Saving...", callback);
+        } else {
+            ExpensesPostCaller expensesPostCaller = new ExpensesPostCaller(this, description, date, amount, category );
+            expensesPostCaller.doApiCall(this, "Saving...", callback);
+        }
+
+
+    }
+
     public void onEditFailed(String message) {
         if(message!="")
             Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();

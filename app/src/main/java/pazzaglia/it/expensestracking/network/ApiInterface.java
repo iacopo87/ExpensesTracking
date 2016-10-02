@@ -36,6 +36,6 @@ public interface ApiInterface {
     Call<ExpensesCreatePOJO> expensesPut(@Path("id") int id, @Field("description") String description, @Field("date") String date, @Field("amount") double amount, @Field("category") int category);
 
     @POST("expenses/{id}/delete")
-    Call<RegistrationPOJO> expensesDelete(@Path("id") int id);
+    Call<ExpensesCreatePOJO> expensesDelete(@Path("id") int id);
 
 }

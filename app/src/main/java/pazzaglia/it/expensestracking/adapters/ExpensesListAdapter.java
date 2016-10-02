@@ -5,7 +5,6 @@ package pazzaglia.it.expensestracking.adapters;
  */
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,31 +24,28 @@ import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.activities.ExpenseDetailActivity;
 import pazzaglia.it.expensestracking.activities.LandingPageActivity;
 import pazzaglia.it.expensestracking.models.Expense;
-import pazzaglia.it.expensestracking.models.RegistrationPOJO;
-import pazzaglia.it.expensestracking.network.ApiInterface;
-import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.models.ExpensesCreatePOJO;
+import pazzaglia.it.expensestracking.network.AbstractApiCaller;
+import pazzaglia.it.expensestracking.network.ExpensesDeleteCaller;
 import pazzaglia.it.expensestracking.shared.Common;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
+public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapter.ViewHolder> {
     Context context;
     private List<Expense> expenses;
 
-    public DataAdapter(List<Expense> android, Context c) {
+    public ExpensesListAdapter(List<Expense> android, Context c) {
         this.expenses = android;
         this.context = c;
     }
 
     @Override
-    public DataAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+    public ExpensesListAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_row, viewGroup, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(DataAdapter.ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(ExpensesListAdapter.ViewHolder viewHolder, int i) {
         viewHolder._txtDescription.setText(expenses.get(i).getDescription());
         viewHolder._txtAmount.setText(String.format("%.2f€", expenses.get(i).getAmount()));
         viewHolder._txtDate.setText(expenses.get(i).getDate());
@@ -140,26 +136,20 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         }
 
         public void deleteItem(final int index){
-            final ProgressDialog progressDialog = Common.showProgressDialog(context, "Deleting...");
-
             //Retrofit delete
-            ApiInterface mApiService = Utils.getInterfaceService(context, true);
-            Call<RegistrationPOJO> mService = mApiService.expensesDelete(expenses.get(index).getId());
-            mService.enqueue(new Callback<RegistrationPOJO>() {
+            ExpensesDeleteCaller expensesDeleteCaller = new ExpensesDeleteCaller(context, expenses.get(index).getId());
+            expensesDeleteCaller.doApiCall(context, "Deleting...", new AbstractApiCaller.MyCallbackInterface<ExpensesCreatePOJO>() {
                 @Override
-                public void onResponse(Call<RegistrationPOJO> call, Response<RegistrationPOJO> response) {
-                    RegistrationPOJO mDeleteObject = response.body();
-                    boolean deleteKo = mDeleteObject != null && mDeleteObject.getError();
-                    if(!deleteKo){
-                        onDeleteSuccess(index, mDeleteObject.getMessage());
-                    }else {
-                        onDeleteFailed((mDeleteObject != null)?mDeleteObject.getMessage():"");
-                    }
-                    progressDialog.dismiss();
+                public void onDownloadFinishedOK(ExpensesCreatePOJO result) {
+                    onDeleteSuccess(index, result.getMessage());
                 }
                 @Override
-                public void onFailure(Call<RegistrationPOJO> call, Throwable t) {
-                    call.cancel();
+                public void onDownloadFinishedKO(ExpensesCreatePOJO result) {
+                    onDeleteFailed((result != null)? result.getMessage(): "");
+                }
+
+                @Override
+                public void doApiCallOnFailure() {
                     onDeleteFailed("Please check your network connection and internet permission");
                 }
             });

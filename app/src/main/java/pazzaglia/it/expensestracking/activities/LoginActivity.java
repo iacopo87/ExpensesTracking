@@ -1,6 +1,5 @@
 package pazzaglia.it.expensestracking.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,13 +14,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.LoginPOJO;
-import pazzaglia.it.expensestracking.network.ApiInterface;
-import pazzaglia.it.expensestracking.network.Utils;
+import pazzaglia.it.expensestracking.network.AbstractApiCaller;
+import pazzaglia.it.expensestracking.network.LoginCaller;
 import pazzaglia.it.expensestracking.shared.Common;
 import pazzaglia.it.expensestracking.shared.Validator;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -68,6 +64,19 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    public boolean validate() {
+        boolean valid = true;
+
+        //check email
+        String email = _emailText.getText().toString();
+        valid &= Validator.isEmailValid(email,_emailText);
+
+        //check password
+        String password = _passwordText.getText().toString();
+        valid &= Validator.isPasswordValid(password,_passwordText);
+
+        return valid;
+    }
 
     public void login() {
         Log.d(TAG, "Login");
@@ -79,35 +88,29 @@ public class LoginActivity extends AppCompatActivity {
 
         _loginButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = Common.showProgressDialog(LoginActivity.this, "Authenticating...");
-
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();
-
-        //Retrofit login
-        ApiInterface mApiService = Utils.getInterfaceService(this, false);
-        Call<LoginPOJO> mService = mApiService.loginPost(email, password);
-        mService.enqueue(new Callback<LoginPOJO>() {
+        LoginCaller loginCaller = new LoginCaller(this, email, password);
+        loginCaller.doApiCall(this,  "Authenticating...", new AbstractApiCaller.MyCallbackInterface<LoginPOJO>() {
             @Override
-            public void onResponse(Call<LoginPOJO> call, Response<LoginPOJO> response) {
-                LoginPOJO mLoginObject = response.body();
-                boolean loginKo = mLoginObject != null && mLoginObject.getError();
-                if(!loginKo){
-                    onLoginSuccess(mLoginObject);
-                }else {
-                    onLoginFailed((mLoginObject != null)?mLoginObject.getMessage():"");
+            public void onDownloadFinishedOK(LoginPOJO result) {
+                if(!result.getError()) {
+                    onLoginSuccess(result);
+                } else {
+                    onLoginFailed((result != null)?result.getMessage():"");
                 }
-                progressDialog.dismiss();
             }
             @Override
-            public void onFailure(Call<LoginPOJO> call, Throwable t) {
-                call.cancel();
+            public void onDownloadFinishedKO(LoginPOJO result) {
+                onLoginFailed((result != null)?result.getMessage():"");
+            }
+
+            @Override
+            public void doApiCallOnFailure() {
                 onLoginFailed("Please check your network connection and internet permission");
             }
         });
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -140,20 +143,6 @@ public class LoginActivity extends AppCompatActivity {
         if(message!="")
             Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();
         _loginButton.setEnabled(true);
-    }
-
-    public boolean validate() {
-        boolean valid = true;
-
-        //check email
-        String email = _emailText.getText().toString();
-        valid &= Validator.isEmailValid(email,_emailText);
-
-        //check password
-        String password = _passwordText.getText().toString();
-        valid &= Validator.isPasswordValid(password,_passwordText);
-
-        return valid;
     }
 
     private void navigateToLandingPage(){

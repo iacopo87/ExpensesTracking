@@ -1,6 +1,5 @@
 package pazzaglia.it.expensestracking.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,13 +15,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import pazzaglia.it.expensestracking.R;
 import pazzaglia.it.expensestracking.models.RegistrationPOJO;
-import pazzaglia.it.expensestracking.network.ApiInterface;
-import pazzaglia.it.expensestracking.network.Utils;
-import pazzaglia.it.expensestracking.shared.Common;
+import pazzaglia.it.expensestracking.network.AbstractApiCaller;
+import pazzaglia.it.expensestracking.network.RegistrationCaller;
 import pazzaglia.it.expensestracking.shared.Validator;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 ;
 
@@ -66,59 +61,6 @@ public class RegistrationFragment extends Fragment {
         return view;
     }
 
-    private void signUp(){
-
-
-        if (!validate()) {
-            //If there are wrong parameters we stop the signup
-            onSignupFailed("");
-            return;
-        }
-
-        //No error, we can procede
-        _signUpButton.setEnabled(false);
-
-        //Show the spinner
-        final ProgressDialog progressDialog = Common.showProgressDialog(getActivity(), "Registering...");
-
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String password = _passwordText.getText().toString();
-
-        //Retrofit signUp
-        ApiInterface mApiService = Utils.getInterfaceService(getActivity(), false);
-        Call<RegistrationPOJO> mService = mApiService.registrationPost(name, email, password);
-        mService.enqueue(new Callback<RegistrationPOJO>() {
-            @Override
-            public void onResponse(Call<RegistrationPOJO> call, Response<RegistrationPOJO> response) {
-                RegistrationPOJO mregistrationnObject = response.body();
-                boolean registrationKo = mregistrationnObject!=null && mregistrationnObject.getError();
-                //showProgress(false);
-                if(!registrationKo){
-                    onSignupSuccess(mregistrationnObject.getMessage());
-                }else {
-                    onSignupFailed((mregistrationnObject!=null)?mregistrationnObject.getMessage():"");
-                }
-                progressDialog.dismiss();
-            }
-            @Override
-            public void onFailure(Call<RegistrationPOJO> call, Throwable t) {
-                call.cancel();
-                onSignupFailed("Please check your network connection and internet permission");
-            }
-        });
-    }
-
-
-    public void onSignupSuccess(String message) {
-        _signUpButton.setEnabled(true);
-        Intent output = new Intent();
-        output.putExtra(LoginActivity.EMAIL,  _emailText.getText().toString());
-        output.putExtra(LoginActivity.REGISTRATION_MESSAGE,  message);
-        getActivity().setResult(getActivity().RESULT_OK, output);
-        getActivity().finish();
-    }
-
     private boolean validate(){
         boolean valid = true;
 
@@ -135,6 +77,50 @@ public class RegistrationFragment extends Fragment {
         valid &= Validator.isPasswordValid(password,_passwordText);
 
         return valid;
+    }
+
+    private void signUp(){
+
+        if (!validate()) {
+            //If there are wrong parameters we stop the signup
+            onSignupFailed("");
+            return;
+        }
+
+        //No error, we can procede
+        _signUpButton.setEnabled(false);
+
+        String name = _nameText.getText().toString();
+        String email = _emailText.getText().toString();
+        String password = _passwordText.getText().toString();
+
+        //Retrofit signUp
+        RegistrationCaller registrationCaller = new RegistrationCaller(getActivity(), name, email, password);
+        registrationCaller.doApiCall(getActivity(),  "Registering...", new AbstractApiCaller.MyCallbackInterface<RegistrationPOJO>() {
+            @Override
+            public void onDownloadFinishedOK(RegistrationPOJO result) {
+                onSignupSuccess(result.getMessage());
+            }
+            @Override
+            public void onDownloadFinishedKO(RegistrationPOJO result) {
+                onSignupFailed((result!=null)? result.getMessage(): "");
+            }
+
+            @Override
+            public void doApiCallOnFailure() {
+                onSignupFailed("Please check your network connection and internet permission");
+            }
+        });
+    }
+
+
+    public void onSignupSuccess(String message) {
+        _signUpButton.setEnabled(true);
+        Intent output = new Intent();
+        output.putExtra(LoginActivity.EMAIL,  _emailText.getText().toString());
+        output.putExtra(LoginActivity.REGISTRATION_MESSAGE,  message);
+        getActivity().setResult(getActivity().RESULT_OK, output);
+        getActivity().finish();
     }
 
     private void onSignupFailed(String message) {
